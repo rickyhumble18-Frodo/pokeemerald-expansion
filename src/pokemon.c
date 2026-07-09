@@ -910,6 +910,14 @@ void SetBoxMonIVs(struct BoxPokemon *mon, u8 fixedIV)
         return;
     }
 
+    if (P_PERFECT_PLAYER_IVS)
+    {
+        u32 perfectIv = MAX_PER_STAT_IVS;
+        for (i = 0; i < NUM_STATS; i++)
+            SetBoxMonData(mon, MON_DATA_HP_IV + i, &perfectIv);
+        return;
+    }
+
     u32 iv;
     u32 ivRandom = Random32();
     enum Species species = GetBoxMonData(mon, MON_DATA_SPECIES);

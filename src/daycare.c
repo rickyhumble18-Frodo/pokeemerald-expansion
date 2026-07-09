@@ -617,6 +617,11 @@ static void InheritIVs(struct Pokemon *egg, struct DayCare *daycare)
     u8 iv;
     u8 howManyIVs = 3;
 
+    // With perfect player IVs, the egg is already all 31s; inheriting from
+    // parents could only lower them (e.g. parents caught before this change).
+    if (P_PERFECT_PLAYER_IVS)
+        return;
+
     if (motherItem == ITEM_DESTINY_KNOT || fatherItem == ITEM_DESTINY_KNOT)
         howManyIVs = 5;
 
