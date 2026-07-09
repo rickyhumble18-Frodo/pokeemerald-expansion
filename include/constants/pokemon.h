@@ -153,7 +153,7 @@ enum __attribute__((packed)) Stat
 #define MAX_GIFT_RIBBON 64
 
 #define MIN_LEVEL 1
-#define MAX_LEVEL 100
+#define MAX_LEVEL 255 // Difficulty hack: raised from 100. Requires the extended gExperienceTables (tools/generate_exp_tables.py) and the widened experience/metLevel fields in the BoxPokemon substructs.
 
 #define MAX_DYNAMAX_LEVEL 10
 

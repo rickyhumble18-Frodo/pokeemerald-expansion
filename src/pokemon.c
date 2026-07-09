@@ -764,7 +764,7 @@ UNUSED static const struct BoxPokemon sBoxPokemonConstantsFit =
     },
 };
 
-STATIC_ASSERT(MAX_LEVEL <= 100, PokemonSubstruct0_experience_PotentiallyTooSmall); // Maximum of ~2 million exp.
+STATIC_ASSERT(MAX_LEVEL <= 255, PokemonSubstruct0_experience_PotentiallyTooSmall); // experience:25 holds up to 33,554,431; the largest table value (Fluctuating at 255) is 17,221,375.
 
 static u32 CompressStatus(u32 status)
 {
@@ -5178,7 +5178,7 @@ u16 GetMonEVCount(struct Pokemon *mon)
 bool8 TryIncrementMonLevel(struct Pokemon *mon)
 {
     enum Species species = GetMonData(mon, MON_DATA_SPECIES, 0);
-    u8 nextLevel = GetMonData(mon, MON_DATA_LEVEL, 0) + 1;
+    u32 nextLevel = GetMonData(mon, MON_DATA_LEVEL, 0) + 1; // u32: with MAX_LEVEL 255, a u8 would wrap to 0 at the cap and set the mon's level to 0
     u32 expPoints = GetMonData(mon, MON_DATA_EXP, 0);
     if (expPoints > gExperienceTables[gSpeciesInfo[species].growthRate][MAX_LEVEL])
     {

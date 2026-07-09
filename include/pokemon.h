@@ -132,15 +132,13 @@ struct PokemonSubstruct0
     u16 species:11; // 2047 species.
     enum Type teraType:5; // 30 types.
     u16 heldItem:10; // 1023 items.
-    u16 unused_02:6;
-    u32 experience:21;
-    u32 nickname11:8; // 11th character of nickname.
-    u32 unused_04:3;
+    u16 pokeball:6; // 63 balls.
+    u32 experience:25; // Difficulty hack: widened from 21 bits for MAX_LEVEL 255 (max table value 17,221,375 needs 25 bits). pokeball/nickname11/nickname12 were rearranged to free the bits; substruct stays 12 bytes.
+    u32 unused_04:7;
     u8 ppBonuses;
     u8 friendship;
-    u16 pokeball:6; // 63 balls.
+    u16 nickname11:8; // 11th character of nickname.
     u16 nickname12:8; // 12th character of nickname.
-    u16 unused_0A:2;
 };
 
 struct PokemonSubstruct1
@@ -185,10 +183,9 @@ struct PokemonSubstruct3
 {
     u8 pokerus;
     u8 metLocation;
-    u16 metLevel:7;
+    u16 metLevel:8; // Difficulty hack: widened from 7 bits for MAX_LEVEL 255; otGender moved into the former unused_0B bit below.
     u16 metGame:4;
     u16 dynamaxLevel:4;
-    u16 otGender:1;
     u32 hpIV:5;
     u32 attackIV:5;
     u32 defenseIV:5;
@@ -215,7 +212,7 @@ struct PokemonSubstruct3
     u32 earthRibbon:1;    // Given to teams that have beaten Mt. Battle's 100-battle challenge in Colosseum/XD.
     u32 worldRibbon:1;    // Distributed during Pokémon Festa '04 and '05 to tournament winners.
     u32 isShadow:1;
-    u32 unused_0B:1;
+    u32 otGender:1;
     u32 abilityNum:2;
 
     // The functionality of this bit changed in FRLG:
@@ -368,7 +365,7 @@ struct BattlePokemon
     u32 status1;
     struct Volatiles volatiles;
     u32 otId;
-    u8 metLevel:7;
+    u8 metLevel; // Difficulty hack: full byte (was :7 with isShiny) for MAX_LEVEL 255.
     u8 isShiny:1;
     u8 affectionHearts;
 };
@@ -639,8 +636,8 @@ struct FormChangeContext
     u16 maxHP;
     u32 gmaxFactor:1;
     enum Type teraType;
-    u32 level:7;
-    u32 padding:8;
+    u32 level:8; // Difficulty hack: widened from 7 bits for MAX_LEVEL 255.
+    u32 padding:7;
 };
 
 enum FusionExtraMoveHandling
