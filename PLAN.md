@@ -24,7 +24,7 @@ becomes a repeatable gauntlet that grows stronger every time you beat it.
   101–255 extend from the level-100 total using medium-fast cubic deltas
   (`exp(n) = exp(100) + (n³ − 100³)`) for **all** growth rates, because
   Erratic's formula goes negative past level 160. Every table is strictly
-  increasing and u32-safe. Validated; **not yet applied** to the codebase.
+  increasing and u32-safe. Applied to the codebase in Phase 2.
 
 ### Phase 1 — Gameplay configuration ✅ (done)
 Decisions recorded below under "Config decisions".
@@ -48,13 +48,41 @@ Decisions recorded below under "Config decisions".
 - Species pool untouched: all species remain available
   (`include/config/species_enabled.h` unmodified).
 
-### Phase 2 — Level cap 255 (not started)
-- Apply `tools/generate_exp_tables.py` output to
-  `src/data/pokemon/experience_tables.h`.
-- Raise `MAX_LEVEL` to 255 and audit everything that assumes 100
-  (obedience, badge scaling, summary screen, level-up moves, Rare Candy, ...).
-- Consider `include/config/caps.h` (`B_EXP_CAP_TYPE`/`B_LEVEL_CAP_TYPE`,
-  currently both NONE) for progression gating during the main game.
+### Phase 2 — Level cap 255 ✅ (done)
+- `MAX_LEVEL` raised to 255 (`include/constants/pokemon.h`).
+- `tools/generate_exp_tables.py` output applied to
+  `src/data/pokemon/experience_tables.h` (6 growth rates × 256 entries,
+  strictly increasing, validated).
+- **Save-format changes** (fresh saves only; existing saves incompatible):
+  - `PokemonSubstruct0.experience` widened 21 → 25 bits (max table value
+    17,221,375 needs 25; 21 held only ~2M). `pokeball`/`nickname11`/
+    `nickname12` rearranged within the substruct to free the bits; still
+    12 bytes.
+  - `PokemonSubstruct3.metLevel` widened 7 → 8 bits; `otGender` moved into
+    the former `unused_0B` bit.
+- RAM structs: `BattlePokemon.metLevel` and `FormChangeContext.level`
+  widened 7 → 8 bits.
+- Bug fixed: `TryIncrementMonLevel` used `u8 nextLevel = level + 1`, which
+  wraps to 0 at level 255 and would have set the mon's level to 0.
+- `sExperienceScalingFactors` (scaled exp formula, Gen 5/7+) extended from
+  index 210 to 520 — it is indexed by `faintedLevel * 2 + 10`, which
+  reaches 520 at level 255; previously an out-of-bounds read.
+- **Obedience decision**: unchanged code. With the Rain Badge (badge 8),
+  `GetAttackerObedienceForAction` returns OBEYS unconditionally, so
+  badge-complete players get full obedience to 255. Pre-badge-8, the
+  vanilla thresholds (10/20/.../80) apply against level met (Gen 8+
+  mechanics) — met level now stores the full 0–255 range.
+- Caps confirmed off: `B_EXP_CAP_TYPE = EXP_CAP_NONE`,
+  `B_LEVEL_CAP_TYPE = LEVEL_CAP_NONE`; `GetCurrentLevelCap()` returns
+  `MAX_LEVEL` (255).
+- Battle Frontier: Level 50 mode unchanged; Open Level is defined as
+  `MAX_LEVEL` upstream, so it now scales to 255 (frontier mon exp is read
+  from the extended tables — in range).
+- Stat math at 255 verified: max HP 1805, max other stat ~1699 (base 255,
+  252 EVs, 31 IVs, boosting nature) — well inside u16. Damage calc's level
+  term is 104 (vs 42 at level 100); worst-case base-damage intermediate
+  ~9×10⁸ fits u32/s32; scaled-exp math already uses u64.
+- Deferred: soft/hard EXP cap gating during the main story (open question).
 
 ### Phase 3 — Trainer overhaul (not started)
 - All trainers get fuller teams and higher levels across the whole game.
