@@ -84,11 +84,38 @@ Decisions recorded below under "Config decisions".
   ~9×10⁸ fits u32/s32; scaled-exp math already uses u64.
 - Deferred: soft/hard EXP cap gating during the main story (open question).
 
-### Phase 3 — Trainer overhaul (not started)
-- All trainers get fuller teams and higher levels across the whole game.
-- Likely tooling: bulk edits to `src/data/trainers.party` (trainerproc
-  format); possibly the expansion's `B_VAR_DIFFICULTY` system for
-  difficulty-tiered trainer variants.
+### Phase 3a — Global trainer difficulty pass ✅ (done)
+Trainer data lives in `src/data/trainers.party` (trainerproc "competitive
+syntax", piped through `cpp -traditional-cpp` then `tools/trainerproc` into
+`src/data/trainers.h` by `trainer_rules.mk`).
+
+`tools/boost_trainers.py` rewrote 760 of 855 trainers:
+- Levels +20% (ceil), clamped to [5, 255] — 1458 level lines raised.
+- Parties filled to ≥4 Pokémon (≥6 for trainers inside Hoenn gym maps —
+  the trainers fought right before each leader); 1720 mons added.
+- 123 vanilla duplicate-species slots replaced.
+- Padding/replacement species come from the wild encounter tables of the
+  map each trainer is fought on (derived from `data/maps/*/scripts.inc`
+  `trainerbattle` commands + `src/data/wild_encounters.json`); maps
+  without wild data (gyms, hideouts) fall back to Hoenn-route species in
+  a level band around the padding level. Padding mons use the party's
+  minimum level and vanilla-style 0 IVs.
+- 13 trainers with no AI line got `AI: Basic Trainer`.
+- Idempotent: boosted trainers carry a `/* boost_trainers: applied-v1 */`
+  marker comment above their header (comments between sections are safe in
+  the cpp+trainerproc pipeline; inside a section they are not); re-runs are
+  byte-identical no-ops. `--check` re-runs validation only.
+- Excluded (94): all Leader / Elite Four / Champion / Rival (Brendan, May,
+  Wally, Steven) / Magma & Aqua Leader+Admin class trainers, plus the empty
+  `TRAINER_NONE`. Frontier brains and apprentice/e-reader-style trainers in
+  `trainers.party` (Anabel, Tucker, etc.) were boosted only if their class
+  wasn't excluded; FRLG trainers (`trainers_frlg.party`) untouched.
+- Validation: 855 trainers checked — party sizes 1–6, no empty parties,
+  no duplicate species on modified trainers, all levels in range.
+
+### Phase 3b — Boss overhaul (not started)
+- Gym leaders, rivals, Wally, Magma/Aqua bosses, E4 and Champion get
+  hand-tuned teams (Phase 4 loops build on the E4 teams).
 
 ### Phase 4 — Repeatable Elite Four (not started)
 - Elite Four rematches loop indefinitely; each completed loop increments a
