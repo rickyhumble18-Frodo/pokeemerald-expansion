@@ -2001,6 +2001,50 @@ static enum BattleTrainer GetBattlerTrainerFromParty(struct Pokemon *party)
     return ((party - gParties[B_TRAINER_PLAYER]) / PARTY_SIZE);
 }
 
+// Difficulty hack (Phase 4): each completed League clear raises the Elite
+// Four and Champion +5 levels, clamped at MAX_LEVEL. Returns 0 for trainers
+// outside the League, so it doubles as an "is scaling" check.
+u32 GetEliteFourLoopCount(u16 trainerNum)
+{
+    switch (trainerNum)
+    {
+    case TRAINER_SIDNEY:
+    case TRAINER_PHOEBE:
+    case TRAINER_GLACIA:
+    case TRAINER_DRAKE:
+    case TRAINER_WALLACE:
+        return VarGet(VAR_ELITE_FOUR_LOOPS);
+    default:
+        return 0;
+    }
+}
+
+static void ApplyEliteFourLoopLevelBoost(struct Pokemon *party, u32 monsCount, u16 trainerNum)
+{
+    u32 i, loops = GetEliteFourLoopCount(trainerNum);
+
+    if (loops == 0)
+        return;
+
+    for (i = 0; i < monsCount; i++)
+    {
+        struct Pokemon *mon = &party[i];
+        enum Species species = GetMonData(mon, MON_DATA_SPECIES);
+        u32 level = GetMonData(mon, MON_DATA_LEVEL);
+        u32 boosted = min(MAX_LEVEL, level + 5 * loops);
+
+        if (boosted != level)
+        {
+            // Level is derived from EXP inside CalculateMonStats, so EXP is
+            // the field to write. Movesets are the preset trainer-data sets
+            // and are untouched by the level change.
+            u32 exp = gExperienceTables[gSpeciesInfo[species].growthRate][boosted];
+            SetMonData(mon, MON_DATA_EXP, &exp);
+            CalculateMonStats(mon);
+        }
+    }
+}
+
 static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
 {
     u8 retVal;
@@ -2026,6 +2070,7 @@ static u8 CreateNPCTrainerParty(struct Pokemon *party, u16 trainerNum)
     {
         retVal = CreateNPCTrainerPartyFromTrainer(party, GetTrainerStructFromId(trainerNum), halfTeam, gBattleTypeFlags);
     }
+    ApplyEliteFourLoopLevelBoost(party, retVal, trainerNum);
     return retVal;
 }
 

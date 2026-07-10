@@ -6154,6 +6154,12 @@ static u32 GetTrainerMoneyToGive(u16 trainerId)
             moneyReward = 4 * lastMonLevel * gBattleStruct->moneyMultiplier * 2 * trainerMoney;
         else
             moneyReward = 4 * lastMonLevel * gBattleStruct->moneyMultiplier * trainerMoney;
+
+        // Difficulty hack (Phase 4): lastMonLevel above comes from static
+        // trainer data and doesn't see the loop level boost, so E4/Champion
+        // payouts scale with the loop counter instead. AddMoney clamps the
+        // player's total at MAX_MONEY.
+        moneyReward *= GetEliteFourLoopCount(trainerId) + 1;
     }
 
     return moneyReward;

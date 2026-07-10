@@ -362,6 +362,7 @@ gSpecials::
 	def_special DoesPartyHaveEnigmaBerry
 	def_special GenerateContestRand
 	def_special SetChampionSaveWarp
+	def_special BufferEliteFourLoopStats
 	def_special TryPutTreasureInvestigatorsOnAir
 	def_special TryPutLotteryWinnerReportOnAir
 	def_special TryPutTrainerFanClubOnAir

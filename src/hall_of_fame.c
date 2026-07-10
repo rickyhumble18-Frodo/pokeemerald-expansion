@@ -775,7 +775,15 @@ static void Task_Hof_HandleExit(u8 taskId)
 
 static void StartCredits(void)
 {
-    SetMainCallback2(CB2_StartCreditsSequence);
+    // Difficulty hack (Phase 4): VAR_ELITE_FOUR_LOOPS is incremented in the
+    // Hall of Fame map script before the game-clear special runs, so it is
+    // 1 on the first championship and 2+ on repeat clears. Repeat clears
+    // skip the credits roll and continue straight from the Hall of Fame
+    // save (same as pressing Continue after the credits).
+    if (VarGet(VAR_ELITE_FOUR_LOOPS) >= 2)
+        SetMainCallback2(CB2_ContinueSavedGame);
+    else
+        SetMainCallback2(CB2_StartCreditsSequence);
 }
 
 #undef tDontSaveData

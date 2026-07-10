@@ -148,12 +148,58 @@ into `src/data/trainers.party` (56 authored teams + 36 derived rematches =
 bosses compensate with full teams, perfect IVs, held items, EVs and smart
 AI — never pure level inflation.
 
-### Phase 4 — Repeatable Elite Four (not started)
-- Elite Four rematches loop indefinitely; each completed loop increments a
-  save variable that scales E4/Champion levels upward.
-- Builds on Phase 3's trainer data plus a level-offset mechanism keyed to
-  that var (candidates: dynamic level scaling at party-creation time in
-  `CreateNPCTrainerPartyFromTrainer`, or `B_VAR_DIFFICULTY` trainer tiers).
+### Phase 4 — Repeatable, scaling Elite Four ✅ (done)
+
+**Route decision**: evaluated (a) the expansion's `B_VAR_DIFFICULTY` tier
+system vs (b) a custom hook in the trainer party loader. **Chose (b).**
+The tier system (`include/constants/difficulty.h`, `src/difficulty.c`)
+supports exactly three fixed tiers (Easy/Normal/Hard), each requiring a
+separate hand-written party in `trainers.party` — it cannot express
+unbounded "+5 per loop" scaling, and maintaining N copies of five boss
+teams per tier would be miserable. The hook is ~40 lines, scales
+indefinitely, and keeps Phase 3b's authored teams as the single source of
+truth.
+
+- `VAR_ELITE_FOUR_LOOPS` (repurposed `VAR_UNUSED_0x404E`), incremented by
+  `addvar` in the Hall of Fame map script — inside the `VAR_TEMP_1`-gated
+  entry cutscene, immediately before the game-clear flags call, so it
+  fires exactly once per clear.
+- **Level scaling**: `ApplyEliteFourLoopLevelBoost` in `src/battle_main.c`
+  runs at the end of `CreateNPCTrainerParty` for
+  Sidney/Phoebe/Glacia/Drake/Wallace: each mon's level += 5 × loops,
+  clamped at 255, applied by writing the exp-table value and calling
+  `CalculateMonStats` (level is derived from EXP there). **Movesets are
+  the preset Phase 3b 4-move sets stored in trainer data — they are
+  assigned independently of level and are identical at every loop**, so
+  nothing regenerates or breaks as levels scale.
+- **Re-enterability & room reset**: vanilla Emerald already handles this —
+  `EverGrandeCity_HallOfFame_EventScript_ResetEliteFour` (called from the
+  game-clear flags script) clears all four `FLAG_DEFEATED_ELITE_4_*` and
+  zeroes `VAR_ELITE_4_STATE`, so doors, NPCs and rooms reset for a fresh
+  run every time. Verified; no changes needed.
+- **Credits skip**: `StartCredits` (`src/hall_of_fame.c`) checks the loop
+  var (incremented before `GameClear` runs, so it reads 1 on the first
+  clear): loops ≥ 2 skips the credits roll and continues straight from
+  the Hall of Fame save via `CB2_ContinueSavedGame`.
+- **Lobby NPC**: a "loop scholar" (`LOCALID_LEAGUE_LOOP_SCHOLAR`, Expert
+  graphics) in the League 1F lobby states the loop count and the current
+  E4 level range via the new `BufferEliteFourLoopStats` special
+  (`src/field_specials.c`, registered in `data/specials.inc`).
+- **Prize money**: `GetTrainerMoneyToGive` reads the *static* trainer-data
+  level, so the level boost alone wouldn't raise payouts — E4/Champion
+  rewards are multiplied by `loops + 1` (clamped by `AddMoney`'s
+  `MAX_MONEY` on receipt).
+- **Test plan** (debug menu → Flags/Vars → `VAR_ELITE_FOUR_LOOPS`):
+  | loops | E4/Champion levels |
+  |---|---|
+  | 0 | baseline 57–65 (Sidney 57–59 … Wallace 62–65) |
+  | 1 | 62–70 |
+  | 5 | 82–90 |
+  | 20 | 157–165 |
+  Clamp: Wallace's ace hits 255 at loop 38; everything is 255 by loop 40.
+  The increment cannot double-fire: the Hall of Fame cutscene is gated on
+  `VAR_TEMP_1 == 0`, sets it to 1 mid-script, and the player is warped out
+  of the map afterward.
 
 ## Config decisions (2026-07-09)
 

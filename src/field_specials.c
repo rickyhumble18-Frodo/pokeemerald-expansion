@@ -5779,3 +5779,18 @@ bool8 CheckAddCoins(void)
     else
         return TRUE;
 }
+
+// Difficulty hack (Phase 4): fills gStringVar1/2/3 with the completed League
+// loop count and the E4/Champion level range for the current loop, for the
+// League lobby scholar. Baselines are the Phase 3b teams: Sidney's lowest
+// mon is 57, Wallace's ace is 65; each loop adds +5, clamped at MAX_LEVEL.
+void BufferEliteFourLoopStats(void)
+{
+    u32 loops = VarGet(VAR_ELITE_FOUR_LOOPS);
+    u32 minLevel = min(MAX_LEVEL, 57 + 5 * loops);
+    u32 maxLevel = min(MAX_LEVEL, 65 + 5 * loops);
+
+    ConvertIntToDecimalStringN(gStringVar1, loops, STR_CONV_MODE_LEFT_ALIGN, 5);
+    ConvertIntToDecimalStringN(gStringVar2, minLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+    ConvertIntToDecimalStringN(gStringVar3, maxLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+}

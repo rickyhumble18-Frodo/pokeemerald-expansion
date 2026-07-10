@@ -42,6 +42,7 @@ EverGrandeCity_HallOfFame_EventScript_EnterHallOfFame::
 	waitfieldeffect FLDEFF_HALL_OF_FAME_RECORD
 	delay 40
 	setvar VAR_TEMP_1, 1
+	addvar VAR_ELITE_FOUR_LOOPS, 1
 	call EverGrandeCity_HallOfFame_EventScript_SetGameClearFlags
 	checkplayergender
 	goto_if_eq VAR_RESULT, MALE, EverGrandeCity_HallOfFame_EventScript_GameClearMale

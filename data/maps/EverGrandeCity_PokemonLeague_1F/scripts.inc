@@ -135,3 +135,34 @@ EverGrandeCity_PokemonLeague_1F_Text_GoForth:
 	.string "TRAINER! Believe in yourself and your\n"
 	.string "POKéMON, and go forth!$"
 
+
+EverGrandeCity_PokemonLeague_1F_EventScript_LoopScholar::
+	lock
+	faceplayer
+	special BufferEliteFourLoopStats
+	goto_if_eq VAR_ELITE_FOUR_LOOPS, 0, EverGrandeCity_PokemonLeague_1F_EventScript_LoopScholarNoClears
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_LoopScholarLoops, MSGBOX_DEFAULT
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_EventScript_LoopScholarNoClears::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_LoopScholarNoClears, MSGBOX_DEFAULT
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_Text_LoopScholarNoClears:
+	.string "I study the ELITE FOUR's strength.\p"
+	.string "No one has conquered the League yet.\n"
+	.string "They await challengers at Lv{STR_VAR_2} to\l"
+	.string "Lv{STR_VAR_3}.\p"
+	.string "They say each time someone wins,\n"
+	.string "the LEAGUE only grows stronger…$"
+
+EverGrandeCity_PokemonLeague_1F_Text_LoopScholarLoops:
+	.string "I study the ELITE FOUR's strength.\p"
+	.string "The League has been conquered\n"
+	.string "{STR_VAR_1} time(s) now.\p"
+	.string "Fueled by defeat, the ELITE FOUR\n"
+	.string "currently battle at Lv{STR_VAR_2} to Lv{STR_VAR_3}!\p"
+	.string "Their prize money has swelled to\n"
+	.string "match. There is no end to this…$"
