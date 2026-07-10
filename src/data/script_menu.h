@@ -1127,6 +1127,26 @@ static const struct MenuAction MultichoiceList_Exit[] =
     {gText_Exit},
 };
 
+// Difficulty hack (Phase 5): stat pickers for the League nature sage.
+// Order matches the nature table: nature = statUp * 5 + statDown over
+// (Atk, Def, Spe, SpA, SpD). Picking the same stat twice gives a neutral
+// nature.
+static const struct MenuAction sMultichoiceList_NatureStatUp[] = {
+    {COMPOUND_STRING("Attack")},
+    {COMPOUND_STRING("Defense")},
+    {COMPOUND_STRING("Speed")},
+    {COMPOUND_STRING("Sp. Atk")},
+    {COMPOUND_STRING("Sp. Def")},
+};
+
+static const struct MenuAction sMultichoiceList_NatureStatDown[] = {
+    {COMPOUND_STRING("Attack")},
+    {COMPOUND_STRING("Defense")},
+    {COMPOUND_STRING("Speed")},
+    {COMPOUND_STRING("Sp. Atk")},
+    {COMPOUND_STRING("Sp. Def")},
+};
+
 struct MultichoiceListStruct
 {
     const struct MenuAction *list;
@@ -1294,6 +1314,8 @@ static const struct MultichoiceListStruct sMultichoiceLists[] =
     [MULTI_HOF_VICTORIES_QUIT]                         = MULTICHOICE(sMultichoiceList_HOF_Victories_Quit),
     [MULTI_EGGS_VICTORIES_QUIT]                        = MULTICHOICE(sMultichoiceList_Eggs_Victories_Quit),
     [MULTI_HOF_EGGS_VICTORIES_QUIT]                    = MULTICHOICE(sMultichoiceList_HOF_Eggs_Victories_Quit),
+    [MULTI_NATURE_STAT_UP]             = MULTICHOICE(sMultichoiceList_NatureStatUp),
+    [MULTI_NATURE_STAT_DOWN]           = MULTICHOICE(sMultichoiceList_NatureStatDown),
 };
 
 const u8 *const gStdStrings[] =

@@ -2369,6 +2369,16 @@ void ShowScrollableMultichoice(void)
         task->tKeepOpenAfterSelect = FALSE;
         task->tTaskId = taskId;
         break;
+    case SCROLL_MULTI_LEAGUE_QUARTERMASTER:
+        task->tMaxItemsOnScreen = MAX_SCROLL_MULTI_ON_SCREEN;
+        task->tNumItems = 13;
+        task->tLeft = 12;
+        task->tTop = 1;
+        task->tWidth = 17;
+        task->tHeight = 12;
+        task->tKeepOpenAfterSelect = FALSE;
+        task->tTaskId = taskId;
+        break;
     case SCROLL_MULTI_GLASS_WORKSHOP_VENDOR:
         task->tMaxItemsOnScreen = MAX_SCROLL_MULTI_ON_SCREEN - 1;
         task->tNumItems = 8;
@@ -2562,6 +2572,22 @@ static const u8 *const sScrollableMultichoiceOptions[][MAX_SCROLL_MULTI_LENGTH] 
         COMPOUND_STRING("VENUSAUR DOLL{CLEAR_TO 88}256BP"),
         COMPOUND_STRING("CHARIZARD DOLL{CLEAR_TO 88}256BP"),
         COMPOUND_STRING("BLASTOISE DOLL{CLEAR_TO 88}256BP"),
+        gText_Exit
+    },
+    [SCROLL_MULTI_LEAGUE_QUARTERMASTER] =
+    {
+        COMPOUND_STRING("FULL RESTORE{CLEAR_TO 90}¥9,800"),
+        COMPOUND_STRING("MAX REVIVE{CLEAR_TO 90}¥24,000"),
+        COMPOUND_STRING("MAX ELIXIR{CLEAR_TO 90}¥12,000"),
+        COMPOUND_STRING("X ATTACK{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("X DEFENSE{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("X SP. ATK{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("X SP. DEF{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("X SPEED{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("GUARD SPEC.{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("DIRE HIT{CLEAR_TO 90}¥3,000"),
+        COMPOUND_STRING("RARE CANDY{CLEAR_TO 90}¥40,000"),
+        COMPOUND_STRING("LUCKY EGG{CLEAR_TO 90}¥100,000"),
         gText_Exit
     },
     [SCROLL_MULTI_BF_EXCHANGE_CORNER_VITAMIN_VENDOR] =
@@ -5793,4 +5819,17 @@ void BufferEliteFourLoopStats(void)
     ConvertIntToDecimalStringN(gStringVar1, loops, STR_CONV_MODE_LEFT_ALIGN, 5);
     ConvertIntToDecimalStringN(gStringVar2, minLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
     ConvertIntToDecimalStringN(gStringVar3, maxLevel, STR_CONV_MODE_LEFT_ALIGN, 3);
+}
+
+// Difficulty hack (Phase 5): computes a nature from the sage's two stat
+// menus (gSpecialVar_0x8005 = stat to raise, gSpecialVar_0x8006 = stat to
+// lower, both 0-4 over Atk/Def/Spe/SpA/SpD) into gSpecialVar_Result for
+// SetHiddenNature, and buffers the nature's name into gStringVar2.
+// Picking the same stat twice yields the matching neutral nature.
+void ComputeNatureFromStatChoices(void)
+{
+    u32 nature = gSpecialVar_0x8005 * 5 + gSpecialVar_0x8006; // 5 stats per row in the nature table
+
+    gSpecialVar_Result = nature;
+    StringCopy(gStringVar2, gNaturesInfo[nature].name);
 }

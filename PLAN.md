@@ -201,6 +201,31 @@ truth.
   `VAR_TEMP_1 == 0`, sets it to 1 mid-script, and the player is warped out
   of the map afterward.
 
+### Phase 5 — Endurance quality-of-life ✅ (done)
+- **Nature sage** (League 1F lobby, ¥5,000): reuses the expansion's mint
+  infrastructure — the hidden-nature system (`MON_DATA_HIDDEN_NATURE`) and
+  the existing `SetHiddenNature` special (sets nature + recalculates stats
+  immediately). Mint items exist and work too (`ItemUseCB_Mint`), but the
+  NPC flow was requested: pick a party mon (`ChoosePartyMon`, egg-guarded),
+  pick the stat to raise and the stat to lower from two 5-entry menus
+  (new `MULTI_NATURE_STAT_UP/DOWN` lists; nature = up×5 + down, verified
+  against the `gNaturesInfo` table — picking the same stat twice gives the
+  matching neutral nature), confirm with the nature name buffered by the
+  new `ComputeNatureFromStatChoices` special, pay, done.
+- **League quartermaster** (League 1F lobby): scripted vendor on the
+  Frontier scrollable-multichoice pattern (`SCROLL_MULTI_LEAGUE_QUARTERMASTER`)
+  with custom steep prices, since pokemarts can't override item prices:
+  Full Restore ¥9,800 · Max Revive ¥24,000 · Max Elixir ¥12,000 · all six
+  X items / Guard Spec. / Dire Hit ¥3,000 · Rare Candy ¥40,000 · Lucky Egg
+  ¥100,000. Economy check: a loop-1 League run pays roughly ¥40–60k
+  (base payouts × loops+1), so one run buys ~1 Rare Candy or a few
+  restores — meaningful but not trivial, and prices stay relevant as loop
+  income grows linearly.
+- PLAN sweep: no debug stock or temporary changes were ever added to shops
+  (the Slateport Rare Candy idea never materialized); the only intentional
+  dev-only feature is the debug menu, which stays ON in dev/CI builds and
+  is auto-disabled by `make release` (see "Debug menu" section).
+
 ## Config decisions (2026-07-09)
 
 | Setting | Value | Where | Note |
@@ -233,12 +258,15 @@ the built ROM (`Debug_ShowMainMenu` linked at `0x0810a370`).
 `DISABLED_ON_RELEASE` config (debug menus, AGBPrint) off automatically. Do
 not ship a `make all` ROM.
 
-## Open questions
+## Resolved design decisions (formerly open questions)
 
-- **Species pool**: currently every species is enabled
-  (`include/config/species_enabled.h` defaults). Decide whether the hack
-  restricts the pool (e.g. Hoenn-only, no legendaries pre-E4) or stays fully
-  open. Left fully open for now.
-- Whether Phase 2 uses a soft/hard EXP cap during the main story or leaves
-  leveling completely free.
-- How E4 loop scaling interacts with the 255 cap (linear per loop? capped?).
+- **Species pool**: stays fully open (`species_enabled.h` defaults). The
+  difficulty model is "underleveled player vs stacked bosses", which works
+  regardless of what the player catches; restricting the pool would fight
+  the endurance concept, not support it.
+- **EXP caps**: none. Leveling stays completely free
+  (`EXP_CAP_NONE`/`LEVEL_CAP_NONE`); the E4 loop treadmill outpaces
+  grinding anyway, and the 255 ceiling is the only hard limit.
+- **E4 loop scaling**: resolved in Phase 4 — linear +5 per loop from the
+  Phase 3b baselines, clamped at 255 (ace caps at loop 38, whole League
+  by loop 40). Prize money scales ×(loops+1).

@@ -166,3 +166,338 @@ EverGrandeCity_PokemonLeague_1F_Text_LoopScholarLoops:
 	.string "currently battle at Lv{STR_VAR_2} to Lv{STR_VAR_3}!\p"
 	.string "Their prize money has swelled to\n"
 	.string "match. There is no end to this…$"
+
+EverGrandeCity_PokemonLeague_1F_EventScript_NatureSage::
+	lock
+	faceplayer
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageIntro, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EverGrandeCity_PokemonLeague_1F_EventScript_SageDecline
+	showmoneybox 0, 0
+	checkmoney 5000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_SageNoMoney
+	getpartysize
+	goto_if_eq VAR_RESULT, 0, EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageWhichMon, MSGBOX_DEFAULT
+	special ChoosePartyMon
+	waitstate
+	goto_if_ge VAR_0x8004, PARTY_SIZE, EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel
+	specialvar VAR_RESULT, ScriptGetPartyMonSpecies
+	goto_if_eq VAR_RESULT, SPECIES_EGG, EverGrandeCity_PokemonLeague_1F_EventScript_SageEgg
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageWhichStatUp, MSGBOX_DEFAULT
+	multichoice 0, 0, MULTI_NATURE_STAT_UP, FALSE
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel
+	copyvar VAR_0x8005, VAR_RESULT
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageWhichStatDown, MSGBOX_DEFAULT
+	multichoice 0, 0, MULTI_NATURE_STAT_DOWN, FALSE
+	goto_if_eq VAR_RESULT, MULTI_B_PRESSED, EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel
+	copyvar VAR_0x8006, VAR_RESULT
+	special ComputeNatureFromStatChoices
+	bufferpartymonnick STR_VAR_1, VAR_0x8004
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageConfirm, MSGBOX_YESNO
+	goto_if_eq VAR_RESULT, NO, EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel
+	special ComputeNatureFromStatChoices
+	special SetHiddenNature
+	removemoney 5000
+	updatemoneybox
+	playfanfare MUS_OBTAIN_ITEM
+	waitfanfare
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageDone, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_EventScript_SageDecline::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageDecline, MSGBOX_DEFAULT
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_EventScript_SageNoMoney::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageNoMoney, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_EventScript_SageEgg::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageEgg, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_EventScript_SageCancel::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_SageDecline, MSGBOX_DEFAULT
+	hidemoneybox
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_Text_SageIntro:
+	.string "I am a sage of temperament.\p"
+	.string "For ¥5,000, I can reshape a POKéMON's\n"
+	.string "nature - which stats flourish and\l"
+	.string "which wither.\p"
+	.string "Shall we begin?$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageWhichMon:
+	.string "Which POKéMON shall I attune?$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageWhichStatUp:
+	.string "Which stat should FLOURISH?$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageWhichStatDown:
+	.string "And which stat may WITHER?\p"
+	.string "Choosing the same stat leaves the\n"
+	.string "temperament balanced.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageConfirm:
+	.string "{STR_VAR_1} shall become {STR_VAR_2} natured\n"
+	.string "for ¥5,000. Proceed?$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageDone:
+	.string "It is done.\p"
+	.string "{STR_VAR_1}'s spirit is now {STR_VAR_2}.\n"
+	.string "Its stats have already shifted.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageDecline:
+	.string "Return should your POKéMON's spirit\n"
+	.string "need refinement.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageNoMoney:
+	.string "You lack the ¥5,000 fee.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_SageEgg:
+	.string "An EGG's spirit is not yet formed.$"
+
+EverGrandeCity_PokemonLeague_1F_EventScript_Quartermaster::
+	lock
+	faceplayer
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMIntro, MSGBOX_DEFAULT
+	showmoneybox 0, 0
+EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu::
+	setvar VAR_0x8004, SCROLL_MULTI_LEAGUE_QUARTERMASTER
+	special ShowScrollableMultichoice
+	waitstate
+	switch VAR_RESULT
+	case 0, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyFullRestore
+	case 1, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyMaxRevive
+	case 2, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyMaxElixir
+	case 3, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXAttack
+	case 4, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXDefense
+	case 5, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpAtk
+	case 6, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpDef
+	case 7, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpeed
+	case 8, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyGuardSpec
+	case 9, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyDireHit
+	case 10, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyRareCandy
+	case 11, EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyLuckyEgg
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMExit
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyFullRestore::
+	setvar VAR_0x8005, ITEM_FULL_RESTORE
+	checkmoney 9800
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_FULL_RESTORE, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 9800
+	updatemoneybox
+	additem ITEM_FULL_RESTORE, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyMaxRevive::
+	setvar VAR_0x8005, ITEM_MAX_REVIVE
+	checkmoney 24000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_MAX_REVIVE, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 24000
+	updatemoneybox
+	additem ITEM_MAX_REVIVE, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyMaxElixir::
+	setvar VAR_0x8005, ITEM_MAX_ELIXIR
+	checkmoney 12000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_MAX_ELIXIR, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 12000
+	updatemoneybox
+	additem ITEM_MAX_ELIXIR, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXAttack::
+	setvar VAR_0x8005, ITEM_X_ATTACK
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_X_ATTACK, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_X_ATTACK, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXDefense::
+	setvar VAR_0x8005, ITEM_X_DEFENSE
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_X_DEFENSE, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_X_DEFENSE, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpAtk::
+	setvar VAR_0x8005, ITEM_X_SP_ATK
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_X_SP_ATK, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_X_SP_ATK, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpDef::
+	setvar VAR_0x8005, ITEM_X_SP_DEF
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_X_SP_DEF, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_X_SP_DEF, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyXSpeed::
+	setvar VAR_0x8005, ITEM_X_SPEED
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_X_SPEED, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_X_SPEED, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyGuardSpec::
+	setvar VAR_0x8005, ITEM_GUARD_SPEC
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_GUARD_SPEC, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_GUARD_SPEC, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyDireHit::
+	setvar VAR_0x8005, ITEM_DIRE_HIT
+	checkmoney 3000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_DIRE_HIT, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 3000
+	updatemoneybox
+	additem ITEM_DIRE_HIT, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyRareCandy::
+	setvar VAR_0x8005, ITEM_RARE_CANDY
+	checkmoney 40000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_RARE_CANDY, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 40000
+	updatemoneybox
+	additem ITEM_RARE_CANDY, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMBuyLuckyEgg::
+	setvar VAR_0x8005, ITEM_LUCKY_EGG
+	checkmoney 100000
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney
+	checkitemspace ITEM_LUCKY_EGG, 1
+	goto_if_eq VAR_RESULT, FALSE, EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom
+	removemoney 100000
+	updatemoneybox
+	additem ITEM_LUCKY_EGG, 1
+	playse SE_SHOP
+	waitse
+	bufferitemname STR_VAR_1, VAR_0x8005
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMPurchased, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMNoMoney::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMNoMoney, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMNoRoom::
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMNoRoom, MSGBOX_DEFAULT
+	goto EverGrandeCity_PokemonLeague_1F_EventScript_QMMenu
+
+EverGrandeCity_PokemonLeague_1F_EventScript_QMExit::
+	hidemoneybox
+	msgbox EverGrandeCity_PokemonLeague_1F_Text_QMBye, MSGBOX_DEFAULT
+	release
+	end
+
+EverGrandeCity_PokemonLeague_1F_Text_QMIntro:
+	.string "Supplies for the endless League!\n"
+	.string "Premium stock, premium prices.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_QMPurchased:
+	.string "{STR_VAR_1} - a fine choice for\n"
+	.string "a League loop.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_QMNoMoney:
+	.string "Your wallet's too light for that.\n"
+	.string "Go squeeze the ELITE FOUR again.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_QMNoRoom:
+	.string "Your BAG has no room for it.$"
+
+EverGrandeCity_PokemonLeague_1F_Text_QMBye:
+	.string "Come back before your next run!$"
