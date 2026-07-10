@@ -113,9 +113,40 @@ syntax", piped through `cpp -traditional-cpp` then `tools/trainerproc` into
 - Validation: 855 trainers checked — party sizes 1–6, no empty parties,
   no duplicate species on modified trainers, all levels in range.
 
-### Phase 3b — Boss overhaul (not started)
-- Gym leaders, rivals, Wally, Magma/Aqua bosses, E4 and Champion get
-  hand-tuned teams (Phase 4 loops build on the E4 teams).
+### Phase 3b — Hand-authored boss fights ✅ (done)
+`tools/boss_teams.py` holds curated teams for every boss and splices them
+into `src/data/trainers.party` (56 authored teams + 36 derived rematches =
+92 sections; idempotent — output depends only on the data file).
+
+- **Coverage**: all 8 gym leaders (story fights; `_2`–`_5` rematches derive
+  from the authored team at +6/+12/+18/+24 levels), every May/Brendan fight
+  (all 3 starter variants × 5 stages, ramping 3→4→5→6→6 mons), Wally
+  (Mauville 3 mons; Victory Road 6, rematches +4 steps), all Magma/Aqua
+  admin+leader fights (no Courtney battle exists in Emerald), Elite Four,
+  Champion Wallace, and the Steven superboss. The two unused
+  `*_PLACEHOLDER` rival entries were left alone.
+- **Every boss mon**: 31 IVs in all six stats, set-appropriate nature,
+  held item, EV spread, and a curated 4-move set. All data emitted as
+  `SPECIES_/ITEM_/MOVE_/NATURE_/ABILITY_` constants; abilities verified
+  legal against `species_info` (runtime assert would fire otherwise).
+- **AI**: every boss has `Smart Trainer / Ace Pokemon / Hp Aware`; top
+  fights (E4, Wallace, Steven, VR Wally, Archie, late rivals) add
+  `Prediction`, per upstream's `docs/tutorials/ai_flags.md` guidance that
+  `AI_FLAG_PREDICTION` pairs with `AI_FLAG_SMART_TRAINER`.
+- **Levels**: ~3–5 above the Phase 3a curve at each location (e.g. Roxanne
+  14–17 over gym trainers at 12; E4 57–62 + Wallace to 65 over Victory
+  Road's 54). **E4/Wallace teams are the loop-0 baselines Phase 4 scales
+  from.**
+- **Later-gen picks** (flagged): Roxanne Larvitar (G2), Brawly Timburr
+  (G5), Wattson Luxio (G4), Flannery Houndour (G2), Tate&Liza Bronzong
+  (G4, Trick Room), Juan Politoed (G2, Drizzle rain captain), Phoebe
+  Mismagius+Dusknoir (G4), Glacia Abomasnow+Froslass (G4, hail core),
+  Drake Garchomp (G4), Maxie/Tabitha Houndoom (G2). Everything else is
+  Hoenn-dex native.
+
+**Tuning principle**: the player is underleveled but has perfect IVs;
+bosses compensate with full teams, perfect IVs, held items, EVs and smart
+AI — never pure level inflation.
 
 ### Phase 4 — Repeatable Elite Four (not started)
 - Elite Four rematches loop indefinitely; each completed loop increments a
