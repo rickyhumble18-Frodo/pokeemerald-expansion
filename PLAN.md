@@ -110,6 +110,25 @@ Decisions recorded below under "Config decisions".
 | Obedience | `B_OBEDIENCE_MECHANICS = GEN_LATEST` | `include/config/battle.h` | Unchanged; must be audited when raising MAX_LEVEL |
 | Trainer AI | Per-trainer flags; presets `AI_FLAG_BASIC_TRAINER` / `AI_FLAG_SMART_TRAINER` (`include/constants/battle_ai.h`); tuning in `include/config/ai.h`; `B_VAR_DIFFICULTY = 0` (off) | — | Unchanged; Phase 3 will raise AI flags per trainer |
 
+## Debug menu (dev builds)
+
+The expansion's built-in debug menus are **enabled in all of our CI/dev
+builds**. `include/config/debug.h` gates them on `DISABLED_ON_RELEASE`,
+which is `TRUE` for any build that doesn't define `RELEASE` — and both our
+local builds and CI use `make all`, not `make release`. Verified present in
+the built ROM (`Debug_ShowMainMenu` linked at `0x0810a370`).
+
+- **Overworld debug menu**: hold **R**, then press **START**
+  (`DEBUG_OVERWORLD_MENU` / `DEBUG_OVERWORLD_HELD_KEYS = R_BUTTON`).
+- **Battle debug menu**: press **SELECT** during a battle
+  (`DEBUG_BATTLE_MENU`).
+- Bonus: Pokémon sprite visualizer via **SELECT** on the summary screen.
+
+⚠️ **Release builds must disable this later**: build final ROMs with
+`make release`, which defines `RELEASE` → `NDEBUG` and flips every
+`DISABLED_ON_RELEASE` config (debug menus, AGBPrint) off automatically. Do
+not ship a `make all` ROM.
+
 ## Open questions
 
 - **Species pool**: currently every species is enabled

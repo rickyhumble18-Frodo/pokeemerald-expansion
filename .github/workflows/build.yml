@@ -36,6 +36,11 @@ jobs:
             tools/wav2agb/wav2agb
           key: tools-${{ runner.os }}-${{ hashFiles('tools/*/Makefile', 'tools/**/*.c', 'tools/**/*.cpp', 'tools/**/*.h') }}
 
+      # NOTE: `make all` is a non-release build, which keeps the expansion's
+      # debug menus enabled (DISABLED_ON_RELEASE == TRUE): overworld menu via
+      # holding R + pressing START, battle menu via SELECT. Final release ROMs
+      # must be built with `make release` instead, which defines RELEASE/NDEBUG
+      # and disables all of them automatically. See PLAN.md.
       - name: Build ROM (Emerald)
         env:
           GAME_VERSION: EMERALD
